@@ -1415,22 +1415,6 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
         return Cow::Borrowed(s);
     } else {
         {
-            let (s, _, ok) = UTF_16LE.decode(bytes);
-            if ok {
-                eprintln!("[CROSSTRACE] decoding sequence success with UTF-16LE");
-                return s;
-            }
-        }
-
-        {
-            let (s, _, ok) = UTF_16BE.decode(bytes);
-            if ok {
-                eprintln!("[CROSSTRACE] decoding sequence success with UTF-16BE");
-                return s;
-            }
-        }
-
-        {
             let (s, _, ok) = GB18030.decode(bytes);
             if ok {
                 eprintln!("[CROSSTRACE] decoding sequence success with GB18030");
@@ -1466,6 +1450,22 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
             let (s, _, ok) = BIG5.decode(bytes);
             if ok {
                 eprintln!("[CROSSTRACE] decoding sequence success with BIG5");
+                return s;
+            }
+        }
+
+        {
+            let (s, _, ok) = UTF_16LE.decode(bytes);
+            if ok {
+                eprintln!("[CROSSTRACE] decoding sequence success with UTF-16LE");
+                return s;
+            }
+        }
+
+        {
+            let (s, _, ok) = UTF_16BE.decode(bytes);
+            if ok {
+                eprintln!("[CROSSTRACE] decoding sequence success with UTF-16BE");
                 return s;
             }
         }
