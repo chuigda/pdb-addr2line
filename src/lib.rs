@@ -1415,7 +1415,8 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
         return Cow::Borrowed(s);
     } else {
         {
-            let (s, _, ok) = GB18030.decode(bytes);
+            let (s, dcdr, ok) = GB18030.decode(bytes);
+            dbg!(&s, dcdr, ok);
             if ok {
                 eprintln!("[CROSSTRACE] decoding sequence success with GB18030");
                 return s;
