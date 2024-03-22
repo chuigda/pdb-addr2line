@@ -802,6 +802,7 @@ impl<'a, 's> Context<'a, 's> {
         line_program: &LineProgram,
         file_index: FileIndex,
     ) -> Option<Cow<'a, str>> {
+        eprintln!("entered resolve_filename!!");
         if let Some(string_table) = self.string_table {
             if let Ok(file_info) = line_program.get_file_info(file_index) {
                 #[cfg(feature = "encoding")]
