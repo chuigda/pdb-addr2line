@@ -1406,17 +1406,13 @@ impl std::fmt::Debug for InlineRange {
 #[cfg(feature = "encoding")]
 fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
     use encoding_rs::{GB18030, GBK, EUC_JP, EUC_KR, BIG5, UTF_16BE, UTF_16LE};
-    eprintln!("[CROSSTRACE] byte sequence = {bytes:x?}");
 
-    // first, try UTF-8
     if let Ok(s) = std::str::from_utf8(bytes) {
-        eprintln!("[CROSSTRACE] decoding sequence success with UTF-8");
         return Cow::Borrowed(s);
     } else {
         {
-            let (s, dcdr, has_err) = GB18030.decode(bytes);
+            let (s, _, has_err) = GB18030.decode(bytes);
             if !has_err {
-                eprintln!("[CROSSTRACE] decoding sequence success with GB18030");
                 return s;
             }
         }
@@ -1424,7 +1420,6 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
         {
             let (s, _, has_err) = GBK.decode(bytes);
             if !has_err {
-                eprintln!("[CROSSTRACE] decoding sequence success with GBK");
                 return s;
             }
         }
@@ -1432,7 +1427,6 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
         {
             let (s, _, has_err) = EUC_JP.decode(bytes);
             if !has_err {
-                eprintln!("[CROSSTRACE] decoding sequence success with EUC_JP");
                 return s;
             }
         }
@@ -1440,7 +1434,6 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
         {
             let (s, _, has_err) = EUC_KR.decode(bytes);
             if !has_err {
-                eprintln!("[CROSSTRACE] decoding sequence success with EUC_KR");
                 return s;
             }
         }
@@ -1448,7 +1441,6 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
         {
             let (s, _, has_err) = BIG5.decode(bytes);
             if !has_err {
-                eprintln!("[CROSSTRACE] decoding sequence success with BIG5");
                 return s;
             }
         }
@@ -1456,7 +1448,6 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
         {
             let (s, _, has_err) = UTF_16LE.decode(bytes);
             if !has_err {
-                eprintln!("[CROSSTRACE] decoding sequence success with UTF-16LE");
                 return s;
             }
         }
@@ -1464,13 +1455,10 @@ fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
         {
             let (s, _, has_err) = UTF_16BE.decode(bytes);
             if !has_err {
-                eprintln!("[CROSSTRACE] decoding sequence success with UTF-16BE");
                 return s;
             }
         }
 
-        // just use to_string_lossy if it's not in options above
-        eprintln!("[CROSSTRACE] did not end up with good decoder, using to_string_lossy");
         return String::from_utf8_lossy(bytes);
     }
 }
