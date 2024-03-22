@@ -804,6 +804,14 @@ impl<'a, 's> Context<'a, 's> {
     ) -> Option<Cow<'a, str>> {
         if let Some(string_table) = self.string_table {
             if let Ok(file_info) = line_program.get_file_info(file_index) {
+                #[cfg(feature = "encoding")]
+                if let Ok(raw_string) = file_info.name.to_raw_string(string_table) {
+                    return Some(guess_encoding_and_decode(raw_string.as_bytes()));
+                } else {
+                    return None;
+                }
+
+                #[cfg(not(feature = "encoding"))]
                 return file_info.name.to_string_lossy(string_table).ok();
             }
         }
@@ -1392,5 +1400,67 @@ impl std::fmt::Debug for InlineRange {
             .field("file_index", &self.file_index)
             .field("line_start", &self.line_start)
             .finish()
+    }
+}
+
+#[cfg(feature = "encoding")]
+fn guess_encoding_and_decode<'a>(bytes: &'a [u8]) -> Cow<'a, str> {
+    use encoding_rs::{GB18030, GBK, EUC_JP, EUC_KR, BIG5, UTF_16BE, UTF_16LE};
+
+    // first, try UTF-8
+    if let Ok(s) = std::str::from_utf8(bytes) {
+        return Cow::Borrowed(s);
+    } else {
+        {
+            let (s, _, ok) = UTF_16LE.decode(bytes);
+            if ok {
+                return s;
+            }
+        }
+
+        {
+            let (s, _, ok) = UTF_16BE.decode(bytes);
+            if ok {
+                return s;
+            }
+        }
+
+        {
+            let (s, _, ok) = GB18030.decode(bytes);
+            if ok {
+                return s;
+            }
+        }
+
+        {
+            let (s, _, ok) = GBK.decode(bytes);
+            if ok {
+                return s;
+            }
+        }
+
+        {
+            let (s, _, ok) = EUC_JP.decode(bytes);
+            if ok {
+                return s;
+            }
+        }
+
+        {
+            let (s, _, ok) = EUC_KR.decode(bytes);
+            if ok {
+                return s;
+            }
+        }
+
+        {
+            let (s, _, ok) = BIG5.decode(bytes);
+            if ok {
+                return s;
+            }
+        }
+
+        // just use to_string_lossy if it's not in options above
+        return String::from_utf8_lossy(bytes);
     }
 }
